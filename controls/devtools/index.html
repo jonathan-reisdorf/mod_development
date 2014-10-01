@@ -9,11 +9,45 @@
     <div class="devtools">
       <div class="top"></div>
       <iframe src="/devtools/blank.html" frameborder="0" scrolling="no"></iframe>
+      <div class="resizearea"></div>
     </div>
 
     <!-- Scripts -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="/lib/jquery-2.1.1.min.js"></script>
+    <script>
+        var resizeHandle = {
+            init : function() {
+                $('.top').mousedown(this.start);
+                $('.resizearea').mouseup(this.end).mousemove(this.move);
+            },
+            vars : {
+                origin : null,
+                enabled : false,
+                offset : 400
+            },
+            start : function(e) {
+                $(this).addClass('moving');
+                resizeHandle.vars.origin = e.clientY;
+                resizeHandle.vars.enabled = true;
+                $('.resizearea').show();
+            },
+            move : function(e) {
+                if (!resizeHandle.vars.enabled) { return; }
+
+                var newOffset = resizeHandle.vars.offset + (resizeHandle.vars.origin - e.clientY);
+                socket.emit('resize', newOffset);
+            },
+            end : function(e) {
+                if (!resizeHandle.vars.enabled) { return; }
+                $('.top').removeClass('moving');
+                resizeHandle.vars.enabled = false;
+                resizeHandle.vars.offset = resizeHandle.vars.offset + (resizeHandle.vars.origin - e.clientY);
+                $('.resizearea').hide();
+            }
+        };
+        $(resizeHandle.init.bind(resizeHandle));
+    </script>
 
     <!-- Main -->
     <script type="text/javascript">
