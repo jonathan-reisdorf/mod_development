@@ -23,6 +23,7 @@ var bootstrap = function(http_srv) {
 
   breach.init(function() {
     breach.register('.*', 'devtools');
+    breach.register('core', 'tabs:.*');
 
     breach.expose('init', function(src, args, cb_) {
       async.parallel([common._.devtools.init], cb_);
