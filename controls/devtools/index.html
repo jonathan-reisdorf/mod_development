@@ -16,37 +16,53 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="/lib/jquery-2.1.1.min.js"></script>
     <script>
-        var resizeHandle = {
-            init : function() {
-                $('.top').mousedown(this.start);
-                $('.resizearea').mouseup(this.end).mousemove(this.move);
-            },
-            vars : {
-                origin : null,
-                enabled : false,
-                offset : 400
-            },
-            start : function(e) {
-                $(this).addClass('moving');
-                resizeHandle.vars.origin = e.clientY;
-                resizeHandle.vars.enabled = true;
-                $('.resizearea').show();
-            },
-            move : function(e) {
-                if (!resizeHandle.vars.enabled) { return; }
+      var resizeHandle = {
+        init : function() {
+          $('.top').mousedown(this.start);
+          $('.top, .resizearea').mouseup(this.end).mousemove(this.move);
+        },
+        vars : {
+          origin : null,
+          enabled : false,
+          dimension : 400
+        },
+        start : function(e) {
+          $(this).addClass('moving');
+          resizeHandle.vars.origin = e.clientY;
+          resizeHandle.vars.enabled = true;
+          $('.resizearea').show();
+        },
+        move : function(e) {
+          if (!resizeHandle.vars.enabled) {
+            return;
+          }
 
-                var newOffset = resizeHandle.vars.offset + (resizeHandle.vars.origin - e.clientY);
-                socket.emit('resize', newOffset);
-            },
-            end : function(e) {
-                if (!resizeHandle.vars.enabled) { return; }
-                $('.top').removeClass('moving');
-                resizeHandle.vars.enabled = false;
-                resizeHandle.vars.offset = resizeHandle.vars.offset + (resizeHandle.vars.origin - e.clientY);
-                $('.resizearea').hide();
-            }
-        };
-        $(resizeHandle.init.bind(resizeHandle));
+          var movementOffset = e.clientY - resizeHandle.vars.origin;
+          movementOffset = movementOffset < 0 ? 0 : movementOffset;
+          var newDimension = resizeHandle.vars.dimension - movementOffset;
+          $('.top').css({ height : movementOffset + 3 });
+          $('.devtools').css({ borderTopWidth : movementOffset + 3 });
+          $('.resizearea').html(newDimension + ' px');
+        },
+        end : function(e) {
+          if (!resizeHandle.vars.enabled) {
+            return;
+          }
+
+          var movementOffset = e.clientY - resizeHandle.vars.origin;
+          movementOffset = movementOffset < 0 ? 0 : movementOffset;
+          var newDimension = resizeHandle.vars.dimension - movementOffset;
+          resizeHandle.vars.dimension = newDimension;
+          resizeHandle.vars.enabled = false;
+
+          socket.emit('resize', newDimension);
+
+          $('.top').removeClass('moving').css({ height : 3 });
+          $('.devtools').css({ borderTopWidth : 3 });
+          $('.resizearea').html('').hide();
+        }
+      };
+      $(resizeHandle.init.bind(resizeHandle));
     </script>
 
     <!-- Main -->
