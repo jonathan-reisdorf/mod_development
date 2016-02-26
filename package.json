@@ -1,6 +1,7 @@
 {
   "name": "mod_development",
   "version": "0.1.0",
+  "license": "MIT",
   "main": "./index.js",
   "dependencies": {
     "breach_module": "0.3.x",
